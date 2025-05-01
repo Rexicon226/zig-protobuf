@@ -990,7 +990,7 @@ fn decode_varint_value(comptime T: type, comptime varint_type: VarintType, raw: 
         },
         .Simple => switch (@typeInfo(T)) {
             .int => switch (T) {
-                u8, u16, u32, u64 => @as(T, @intCast(raw)),
+                u8, u16, u32, u64 => std.math.cast(T, raw) orelse return error.InvalidInput,
                 i64 => @as(T, @bitCast(raw)),
                 i32 => std.math.cast(i32, @as(i64, @bitCast(raw))) orelse error.InvalidInput,
                 else => @compileError("Invalid type " ++ @typeName(T) ++ " passed"),
