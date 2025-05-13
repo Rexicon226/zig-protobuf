@@ -455,7 +455,6 @@ fn downloadFile(allocator: std.mem.Allocator, target_file: []const u8, url: []co
         std.process.Child.init(&.{ "curl", "--insecure", "-L", "-o", target_file, url }, allocator)
     else
         std.process.Child.init(&.{ "curl", "-L", "-o", target_file, url }, allocator);
-    child.cwd = sdkPath("/");
     child.stderr = std.io.getStdErr();
     child.stdout = std.io.getStdOut();
     _ = try child.spawnAndWait();
@@ -468,7 +467,6 @@ fn unzipFile(allocator: std.mem.Allocator, file: []const u8, target_directory: [
         &.{ "unzip", "-o", file, "-d", target_directory },
         allocator,
     );
-    child.cwd = sdkPath("/");
     child.stderr = std.io.getStdErr();
     child.stdout = std.io.getStdOut();
     _ = try child.spawnAndWait();
@@ -478,7 +476,6 @@ fn ensureCanDownloadFiles(allocator: std.mem.Allocator) void {
     const result = std.process.Child.run(.{
         .allocator = allocator,
         .argv = &.{ "curl", "--version" },
-        .cwd = sdkPath("/"),
     }) catch { // e.g. FileNotFound
         std.log.err("zig-protobuf: error: 'curl --version' failed. Is curl not installed?", .{});
         std.process.exit(1);
@@ -497,25 +494,12 @@ fn ensureCanUnzipFiles(allocator: std.mem.Allocator) void {
     const result = std.process.Child.run(.{
         .allocator = allocator,
         .argv = &.{"unzip"},
-        .cwd = sdkPath("/"),
     }) catch { // e.g. FileNotFound
-        std.log.err("zig-protobuf: error: 'unzip' failed. Is curl not installed?", .{});
+        std.log.err("zig-protobuf: error: 'unzip' failed. Is unzip not installed?", .{});
         std.process.exit(1);
     };
     defer {
         allocator.free(result.stderr);
         allocator.free(result.stdout);
     }
-    if (result.term.Exited != 0) {
-        std.log.err("zig-protobuf: error: 'unzip' failed. Is curl not installed?", .{});
-        std.process.exit(1);
-    }
-}
-
-fn sdkPath(comptime suffix: []const u8) []const u8 {
-    if (suffix[0] != '/') @compileError("suffix must be an absolute path");
-    return comptime blk: {
-        const root_dir = std.fs.path.dirname(@src().file) orelse ".";
-        break :blk root_dir ++ suffix;
-    };
 }
