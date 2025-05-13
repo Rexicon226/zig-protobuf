@@ -45,7 +45,7 @@ fn compare_pb_structs(value1: anytype, value2: @TypeOf(value1)) bool {
         const field_type = @TypeOf(@field(value1, structInfo.name));
 
         var field1: switch (@typeInfo(field_type)) {
-            .Optional => |optional| optional.child,
+            .optional => |optional| optional.child,
             else => field_type,
         } = undefined;
         var field2: @TypeOf(field1) = undefined;
@@ -57,7 +57,7 @@ fn compare_pb_structs(value1: anytype, value2: @TypeOf(value1)) bool {
         //        requied (for those .? is applied)
         var are_optionals_equal: ?bool = null;
         switch (@typeInfo(field_type)) {
-            .Optional => {
+            .optional => {
                 if (@field(
                     value1,
                     structInfo.name,
