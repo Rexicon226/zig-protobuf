@@ -784,7 +784,7 @@ fn DecodedVarint(comptime T: type) type {
 }
 
 /// Decodes a varint from a slice, to type T.
-fn decode_varint(comptime T: type, input: []const u8) DecodingError!DecodedVarint(T) {
+pub fn decode_varint(comptime T: type, input: []const u8) DecodingError!DecodedVarint(T) {
     var index: usize = 0;
     const len: usize = input.len;
 
